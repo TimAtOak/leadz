@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php --version)",
+      "Bash(composer --version)",
+      "Bash(npm --version)",
+      "Bash(docker --version)",
+      "Bash(where composer *)",
+      "Read(//c/ProgramData/**)",
+      "Bash(scoop list *)"
+    ]
+  }
+}
