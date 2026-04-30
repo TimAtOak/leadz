@@ -38,6 +38,9 @@ class PitchPage
     #[ORM\Column]
     private int $viewCount = 0;
 
+    #[ORM\Column(length: 50)]
+    private string $designTemplate = 'modern';
+
     #[ORM\OneToMany(targetEntity: PageView::class, mappedBy: 'pitchPage', orphanRemoval: true)]
     private Collection $pageViews;
 
@@ -68,6 +71,9 @@ class PitchPage
 
     public function getViewCount(): int { return $this->viewCount; }
     public function incrementViewCount(): static { $this->viewCount++; return $this; }
+
+    public function getDesignTemplate(): string { return $this->designTemplate; }
+    public function setDesignTemplate(string $designTemplate): static { $this->designTemplate = $designTemplate; return $this; }
 
     public function getPageViews(): Collection { return $this->pageViews; }
 }

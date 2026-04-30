@@ -7,7 +7,30 @@
       "Bash(docker --version)",
       "Bash(where composer *)",
       "Read(//c/ProgramData/**)",
-      "Bash(scoop list *)"
+      "Bash(scoop list *)",
+      "Bash(docker-compose up *)",
+      "Bash(docker compose *)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')",
+      "Bash(xargs -I{} taskkill /PID {} /F)",
+      "PowerShell(Get-NetTCPConnection *)",
+      "Bash(docker info *)",
+      "Bash(docker context ls *)",
+      "Bash(docker context *)",
+      "WebFetch(domain:gluestack.io)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:v1.gluestack.io)",
+      "Bash(npm install *)",
+      "Bash(npm uninstall *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(pkill -f \"vite\")",
+      "Bash(xargs grep *)",
+      "Bash(grep -v \"^\\\\s*//\")",
+      "Bash(npx vite *)"
     ]
   }
 }

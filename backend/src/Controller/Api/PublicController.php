@@ -25,12 +25,18 @@ class PublicController extends AbstractController
 
         $lead = $pitchPage->getLead();
 
+        $scan = $lead->getWebsiteScan();
+
         return $this->json([
             'subject' => $pitchPage->getSubject(),
             'body' => $pitchPage->getBody(),
             'domain' => $lead->getDomain(),
             'companyName' => $lead->getCompanyName(),
             'publishedAt' => $pitchPage->getPublishedAt()?->format('c'),
+            'designTemplate' => $pitchPage->getDesignTemplate(),
+            'faviconUrl' => $scan?->getFaviconUrl(),
+            'ogImageUrl' => $scan?->getOgImageUrl(),
+            'logoUrl' => $scan?->getLogoUrl(),
         ]);
     }
 

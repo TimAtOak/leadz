@@ -66,6 +66,9 @@ class LeadController extends AbstractController
         $scan->setH1Texts($data['h1Texts'] ?? []);
         $scan->setDetectedEmails($data['detectedEmails'] ?? []);
         $scan->setDetectedPhones($data['detectedPhones'] ?? []);
+        $scan->setFaviconUrl($data['faviconUrl'] ?? null);
+        $scan->setOgImageUrl($data['ogImageUrl'] ?? null);
+        $scan->setLogoUrl($data['logoUrl'] ?? null);
 
         $em->persist($lead);
         $em->persist($scan);
@@ -170,6 +173,9 @@ class LeadController extends AbstractController
                 'h1Texts' => $scan->getH1Texts(),
                 'detectedEmails' => $scan->getDetectedEmails(),
                 'detectedPhones' => $scan->getDetectedPhones(),
+                'faviconUrl' => $scan->getFaviconUrl(),
+                'ogImageUrl' => $scan->getOgImageUrl(),
+                'logoUrl' => $scan->getLogoUrl(),
                 'scannedAt' => $scan->getScannedAt()?->format('c'),
             ];
         }

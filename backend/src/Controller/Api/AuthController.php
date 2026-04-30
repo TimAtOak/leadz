@@ -78,4 +78,15 @@ class AuthController extends AbstractController
             'createdAt' => $user->getCreatedAt()?->format('c'),
         ]);
     }
+
+    #[Route('/login', name: 'api_auth_login', methods: ['POST'])]
+    public function login(): JsonResponse
+    {
+        // This route exists so the security JsonLogin authenticator's check_path
+        // can match an actual route and avoid a 404 from the router.
+        // The actual authentication is handled by the firewall before the
+        // controller is executed; if this method is reached, return a generic
+        // no-content response.
+        return $this->json([], Response::HTTP_NO_CONTENT);
+    }
 }

@@ -6,6 +6,9 @@ export interface ScanResult {
   h1Texts: string[]
   detectedEmails: string[]
   detectedPhones: string[]
+  faviconUrl: string | null
+  ogImageUrl: string | null
+  logoUrl: string | null
 }
 
 export interface AuthState {

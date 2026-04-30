@@ -8,7 +8,7 @@ export async function getPitchPage(leadId: number): Promise<PitchPage> {
 
 export async function savePitchPage(
   leadId: number,
-  payload: { subject: string; body: string; templateId?: number }
+  payload: { subject: string; body: string; templateId?: number; designTemplate?: string }
 ): Promise<PitchPage> {
   const { data } = await apiClient.post(`/leads/${leadId}/pitch-page`, payload)
   return data

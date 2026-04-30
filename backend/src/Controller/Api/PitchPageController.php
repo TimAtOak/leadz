@@ -68,6 +68,11 @@ class PitchPageController extends AbstractController
         $pitchPage->setSubject($data['subject']);
         $pitchPage->setBody($data['body']);
 
+        $allowed = ['modern', 'colorful', 'corporate', 'minimal'];
+        if (!empty($data['designTemplate']) && in_array($data['designTemplate'], $allowed, true)) {
+            $pitchPage->setDesignTemplate($data['designTemplate']);
+        }
+
         if (!empty($data['templateId'])) {
             $template = $templateRepository->find($data['templateId']);
             if ($template) {
@@ -102,6 +107,7 @@ class PitchPageController extends AbstractController
             'viewCount' => $p->getViewCount(),
             'publishedAt' => $p->getPublishedAt()?->format('c'),
             'templateId' => $p->getTemplate()?->getId(),
+            'designTemplate' => $p->getDesignTemplate(),
             'shareUrl' => '/p/' . $p->getPublicSlug(),
         ];
     }

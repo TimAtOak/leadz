@@ -23,8 +23,13 @@ export interface WebsiteScan {
   h1Texts: string[]
   detectedEmails: string[]
   detectedPhones: string[]
+  faviconUrl: string | null
+  ogImageUrl: string | null
+  logoUrl: string | null
   scannedAt: string
 }
+
+export type DesignTemplate = 'modern' | 'colorful' | 'corporate' | 'minimal'
 
 export interface PitchPage {
   id: number
@@ -34,6 +39,7 @@ export interface PitchPage {
   viewCount: number
   publishedAt: string
   templateId: number | null
+  designTemplate: DesignTemplate
   shareUrl: string
 }
 
@@ -81,4 +87,8 @@ export interface PublicPitchPage {
   domain: string
   companyName: string | null
   publishedAt: string
+  designTemplate: DesignTemplate
+  faviconUrl: string | null
+  ogImageUrl: string | null
+  logoUrl: string | null
 }

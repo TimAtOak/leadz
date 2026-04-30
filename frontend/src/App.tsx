@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './context/AuthContext'
+import { ThemeProvider } from './context/ThemeContext'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
@@ -17,29 +18,31 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/p/:slug" element={<PitchPagePublic />} />
-            <Route
-              path="/dashboard"
-              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
-            />
-            <Route
-              path="/leads/:id"
-              element={<ProtectedRoute><LeadDetailPage /></ProtectedRoute>}
-            />
-            <Route
-              path="/templates"
-              element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>}
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/p/:slug" element={<PitchPagePublic />} />
+              <Route
+                path="/dashboard"
+                element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+              />
+              <Route
+                path="/leads/:id"
+                element={<ProtectedRoute><LeadDetailPage /></ProtectedRoute>}
+              />
+              <Route
+                path="/templates"
+                element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>}
+              />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }

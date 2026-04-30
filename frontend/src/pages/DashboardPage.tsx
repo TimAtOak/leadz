@@ -32,12 +32,12 @@ export function DashboardPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Leads</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Leads</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               {data ? `${data.meta.total} total` : ''}
             </p>
           </div>
-          <div className="text-sm text-gray-500 bg-blue-50 border border-blue-200 text-blue-700 px-3 py-1.5 rounded-lg">
+          <div className="text-sm bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 px-3 py-1.5 rounded-lg">
             Use the Chrome extension to add leads
           </div>
         </div>
@@ -50,7 +50,7 @@ export function DashboardPage() {
               className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                 statusFilter === f.value
                   ? 'bg-brand-600 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
               }`}
             >
               {f.label}
@@ -65,52 +65,52 @@ export function DashboardPage() {
         )}
 
         {!isLoading && data?.data.length === 0 && (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-gray-400 dark:text-gray-600">
             <p className="text-lg">No leads yet</p>
             <p className="text-sm mt-1">Install the Chrome extension and visit a website to add your first lead.</p>
           </div>
         )}
 
         {data && data.data.length > 0 && (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Domain</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Title</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Views</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Added</th>
+                <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Domain</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Title</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Views</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Added</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {data.data.map((lead) => (
-                  <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                  <tr key={lead.id} className="border-b border-gray-50 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50 transition-colors">
                     <td className="px-4 py-3">
                       <a
                         href={lead.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium text-gray-900 hover:text-brand-600 transition-colors"
+                        className="font-medium text-gray-900 hover:text-brand-600 dark:text-gray-100 transition-colors"
                       >
                         {lead.domain}
                       </a>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 max-w-xs truncate">
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 max-w-xs truncate">
                       {lead.title ?? '—'}
                     </td>
                     <td className="px-4 py-3">
                       <LeadStatusBadge status={lead.status as LeadStatus} />
                     </td>
-                    <td className="px-4 py-3 text-gray-500">
+                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
                       {lead.hasPitchPage ? (
-                        <span className="text-orange-600 font-medium">
+                        <span className="text-orange-600 dark:text-orange-400 font-medium">
                           {/* view count shown on detail */}—
                         </span>
                       ) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-gray-400">
+                    <td className="px-4 py-3 text-gray-400 dark:text-gray-500">
                       {new Date(lead.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
@@ -133,17 +133,17 @@ export function DashboardPage() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-600">
+            <span className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
               {page} / {data.meta.pages}
             </span>
             <button
               onClick={() => setPage((p) => Math.min(data.meta.pages, p + 1))}
               disabled={page === data.meta.pages}
-              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50"
+              className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
               Next
             </button>

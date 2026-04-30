@@ -38,6 +38,15 @@ class WebsiteScan
     #[ORM\Column(type: 'json')]
     private array $detectedPhones = [];
 
+    #[ORM\Column(length: 2048, nullable: true)]
+    private ?string $faviconUrl = null;
+
+    #[ORM\Column(length: 2048, nullable: true)]
+    private ?string $ogImageUrl = null;
+
+    #[ORM\Column(length: 2048, nullable: true)]
+    private ?string $logoUrl = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $scannedAt = null;
 
@@ -71,6 +80,15 @@ class WebsiteScan
 
     public function getDetectedPhones(): array { return $this->detectedPhones; }
     public function setDetectedPhones(array $detectedPhones): static { $this->detectedPhones = $detectedPhones; return $this; }
+
+    public function getFaviconUrl(): ?string { return $this->faviconUrl; }
+    public function setFaviconUrl(?string $faviconUrl): static { $this->faviconUrl = $faviconUrl; return $this; }
+
+    public function getOgImageUrl(): ?string { return $this->ogImageUrl; }
+    public function setOgImageUrl(?string $ogImageUrl): static { $this->ogImageUrl = $ogImageUrl; return $this; }
+
+    public function getLogoUrl(): ?string { return $this->logoUrl; }
+    public function setLogoUrl(?string $logoUrl): static { $this->logoUrl = $logoUrl; return $this; }
 
     public function getScannedAt(): ?\DateTimeImmutable { return $this->scannedAt; }
 }

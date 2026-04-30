@@ -1,4 +1,7 @@
-const API_BASE = 'http://localhost:8000/api'
+// During development route extension API requests through the frontend dev server
+// so the Vite proxy will forward them to the backend and avoid absolute-form
+// requests that the PHP built-in server can mishandle.
+const API_BASE = 'http://localhost:5173/api'
 
 async function request<T>(
   path: string,
@@ -41,6 +44,9 @@ export async function apiCreateLead(
     h1Texts: string[]
     detectedEmails: string[]
     detectedPhones: string[]
+    faviconUrl: string | null
+    ogImageUrl: string | null
+    logoUrl: string | null
   }
 ): Promise<{ id: number; domain: string }> {
   return request('/leads', { method: 'POST', body: JSON.stringify(data) }, token)

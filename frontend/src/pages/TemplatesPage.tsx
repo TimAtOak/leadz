@@ -4,6 +4,8 @@ import { getTemplates, createTemplate, updateTemplate, deleteTemplate } from '..
 import { Layout } from '../components/Layout'
 import type { Template } from '../types'
 
+const inputClass = 'w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500'
+
 function TemplateForm({
   initial,
   onSave,
@@ -22,29 +24,29 @@ function TemplateForm({
   return (
     <div className="space-y-3">
       <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">Template name</label>
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Template name</label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className={inputClass}
           placeholder="e.g. Website Redesign Pitch"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">Subject</label>
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Subject</label>
         <input
           type="text"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+          className={inputClass}
           placeholder="Email subject line"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">
+        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
           Body{' '}
-          <span className="text-gray-400 font-normal">
+          <span className="text-gray-400 dark:text-gray-600 font-normal">
             (use {'{{company_name}}'}, {'{{url}}'}, {'{{domain}}'}, {'{{sender_name}}'})
           </span>
         </label>
@@ -52,12 +54,12 @@ function TemplateForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={8}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 resize-y font-mono"
+          className={`${inputClass} resize-y font-mono`}
           placeholder="Hi {{company_name}},&#10;&#10;I noticed your website..."
         />
       </div>
       <div className="flex gap-2 justify-end">
-        <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors">
+        <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
           Cancel
         </button>
         <button
@@ -108,7 +110,7 @@ export function TemplatesPage() {
     <Layout>
       <div className="space-y-6 max-w-3xl">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Templates</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Templates</h1>
           <button
             onClick={() => setShowCreate(true)}
             className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-medium rounded-lg transition-colors"
@@ -118,8 +120,8 @@ export function TemplatesPage() {
         </div>
 
         {showCreate && (
-          <div className="bg-white rounded-xl border border-brand-200 p-5">
-            <h2 className="font-semibold text-gray-700 mb-4">New template</h2>
+          <div className="bg-white rounded-xl border border-brand-200 dark:bg-gray-900 dark:border-brand-800/50 p-5">
+            <h2 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">New template</h2>
             <TemplateForm
               onSave={(data) => createMutation.mutate(data)}
               onCancel={() => setShowCreate(false)}
@@ -135,10 +137,10 @@ export function TemplatesPage() {
         )}
 
         {templates.map((template) => (
-          <div key={template.id} className="bg-white rounded-xl border border-gray-200 p-5">
+          <div key={template.id} className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-5">
             {editingId === template.id ? (
               <>
-                <h2 className="font-semibold text-gray-700 mb-4">Edit template</h2>
+                <h2 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">Edit template</h2>
                 <TemplateForm
                   initial={template}
                   onSave={(data) => updateMutation.mutate({ id: template.id, ...data })}
@@ -151,20 +153,20 @@ export function TemplatesPage() {
                 <div className="flex items-start justify-between mb-3">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-gray-900">{template.name}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{template.name}</h3>
                       {template.isGlobal && (
-                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 px-2 py-0.5 rounded-full">
                           Default
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500 mt-0.5">{template.subject}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{template.subject}</p>
                   </div>
                   {!template.isGlobal && (
                     <div className="flex gap-2 shrink-0">
                       <button
                         onClick={() => setEditingId(template.id)}
-                        className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
+                        className="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
                       >
                         Edit
                       </button>
@@ -172,14 +174,14 @@ export function TemplatesPage() {
                         onClick={() => {
                           if (confirm('Delete this template?')) deleteMutation.mutate(template.id)
                         }}
-                        className="text-sm text-red-400 hover:text-red-600 transition-colors"
+                        className="text-sm text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 transition-colors"
                       >
                         Delete
                       </button>
                     </div>
                   )}
                 </div>
-                <pre className="text-xs text-gray-500 whitespace-pre-wrap font-sans line-clamp-4 bg-gray-50 rounded p-3">
+                <pre className="text-xs text-gray-500 dark:text-gray-400 whitespace-pre-wrap font-sans line-clamp-4 bg-gray-50 dark:bg-gray-800 rounded p-3">
                   {template.body}
                 </pre>
               </>
