@@ -27,9 +27,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .catch(() => {
         localStorage.removeItem('jwt_token')
         setToken(null)
+        setUser(null)
       })
       .finally(() => setIsLoading(false))
-  }, [token])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('jwt_token', newToken)
