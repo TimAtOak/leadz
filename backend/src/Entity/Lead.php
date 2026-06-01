@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\LeadRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LeadRepository::class)]
@@ -59,6 +61,9 @@ class Lead
     #[ORM\Column(length: 50)]
     private string $status = self::STATUS_NEW;
 
+    #[ORM\Column(length: 50)]
+    private string $designTemplate = 'modern';
+
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
 
@@ -74,10 +79,15 @@ class Lead
     #[ORM\OneToOne(targetEntity: PitchPage::class, mappedBy: 'lead', cascade: ['persist', 'remove'])]
     private ?PitchPage $pitchPage = null;
 
+    #[ORM\OneToMany(targetEntity: PageBlock::class, mappedBy: 'lead', cascade: ['remove'], orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
+    private Collection $pageBlocks;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->pageBlocks = new ArrayCollection();
     }
 
     #[ORM\PreUpdate]
@@ -112,6 +122,9 @@ class Lead
     public function getStatus(): string { return $this->status; }
     public function setStatus(string $status): static { $this->status = $status; return $this; }
 
+    public function getDesignTemplate(): string { return $this->designTemplate; }
+    public function setDesignTemplate(string $t): static { $this->designTemplate = $t; return $this; }
+
     public function getNotes(): ?string { return $this->notes; }
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }
 
@@ -123,4 +136,6 @@ class Lead
 
     public function getPitchPage(): ?PitchPage { return $this->pitchPage; }
     public function setPitchPage(?PitchPage $pitchPage): static { $this->pitchPage = $pitchPage; return $this; }
+
+    public function getPageBlocks(): Collection { return $this->pageBlocks; }
 }

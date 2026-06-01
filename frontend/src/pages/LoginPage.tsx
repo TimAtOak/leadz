@@ -20,7 +20,7 @@ export function LoginPage() {
       authLogin(token, user)
       navigate('/dashboard')
     } catch {
-      setError('Invalid email or password')
+      setError('Ungültige E-Mail oder falsches Passwort')
     } finally {
       setIsLoading(false)
     }
@@ -31,7 +31,7 @@ export function LoginPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Leadz</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">In Ihr Konto einloggen</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -41,18 +41,18 @@ export function LoginPage() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-Mail</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
-                placeholder="you@company.com"
+                placeholder="sie@unternehmen.de"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Passwort</label>
               <input
                 type="password"
                 required
@@ -67,13 +67,13 @@ export function LoginPage() {
               disabled={isLoading}
               className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
             >
-              {isLoading ? 'Signing in…' : 'Sign in'}
+              {isLoading ? 'Wird eingeloggt…' : 'Einloggen'}
             </button>
           </form>
           <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            No account?{' '}
+            Noch kein Konto?{' '}
             <Link to="/register" className="text-brand-600 hover:underline font-medium">
-              Create one
+              Jetzt erstellen
             </Link>
           </p>
         </div>

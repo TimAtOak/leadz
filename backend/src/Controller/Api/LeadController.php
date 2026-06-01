@@ -106,6 +106,10 @@ class LeadController extends AbstractController
         if (isset($data['status']) && in_array($data['status'], Lead::STATUSES, true)) {
             $lead->setStatus($data['status']);
         }
+        $allowed = ['modern', 'colorful', 'corporate', 'minimal'];
+        if (isset($data['designTemplate']) && in_array($data['designTemplate'], $allowed, true)) {
+            $lead->setDesignTemplate($data['designTemplate']);
+        }
         if (array_key_exists('companyName', $data)) {
             $lead->setCompanyName($data['companyName']);
         }
@@ -151,6 +155,7 @@ class LeadController extends AbstractController
             'contactEmail' => $lead->getContactEmail(),
             'contactPhone' => $lead->getContactPhone(),
             'status' => $lead->getStatus(),
+            'designTemplate' => $lead->getDesignTemplate(),
             'hasPitchPage' => $lead->getPitchPage() !== null,
             'pitchPageSlug' => $lead->getPitchPage()?->getPublicSlug(),
             'createdAt' => $lead->getCreatedAt()?->format('c'),

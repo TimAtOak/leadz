@@ -18,6 +18,8 @@ services:
   backend:
     build:
       context: ./backend
+    volumes:
+      - uploads:/app/public/uploads
     environment:
       APP_ENV: dev
       APP_SECRET: change_this_to_a_random_32_char_string
@@ -39,8 +41,11 @@ services:
       BACKEND_URL: http://backend:8000
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend/src:/app/src
     depends_on:
       - backend
 
 volumes:
   postgres_data:
+  uploads:

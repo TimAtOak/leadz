@@ -2,6 +2,8 @@
 
 namespace App\Controller\Api;
 
+use App\Entity\CompanyInfo;
+use App\Entity\PageBlock;
 use App\Entity\PageView;
 use App\Repository\PitchPageRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,7 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class PublicController extends AbstractController
 {
     #[Route('/pitch/{slug}', name: 'api_public_pitch_show', methods: ['GET'])]
-    public function show(string $slug, PitchPageRepository $pitchPageRepository): JsonResponse
+    public function show(string $slug, PitchPageRepository $pitchPageRepository, EntityManagerInterface $em): JsonResponse
     {
         $pitchPage = $pitchPageRepository->findBySlug($slug);
 
@@ -24,19 +26,48 @@ class PublicController extends AbstractController
         }
 
         $lead = $pitchPage->getLead();
-
         $scan = $lead->getWebsiteScan();
 
-        return $this->json([
+        $blocks = $em->getRepository(PageBlock::class)->findBy(['lead' => $lead], ['position' => 'ASC']);
+
+        $companyInfo = $em->getRepository(CompanyInfo::class)->findOneBy(['user' => $lead->getUser()]);
+        $primaryColor = $companyInfo?->getPrimaryColor() ?? '#3b82f6';
+        $designTemplate = $lead->getDesignTemplate();
+
+        $pitchContent = [
             'subject' => $pitchPage->getSubject(),
             'body' => $pitchPage->getBody(),
             'domain' => $lead->getDomain(),
             'companyName' => $lead->getCompanyName(),
             'publishedAt' => $pitchPage->getPublishedAt()?->format('c'),
-            'designTemplate' => $pitchPage->getDesignTemplate(),
+            'designTemplate' => $designTemplate,
             'faviconUrl' => $scan?->getFaviconUrl(),
             'ogImageUrl' => $scan?->getOgImageUrl(),
             'logoUrl' => $scan?->getLogoUrl(),
+        ];
+
+        $serializedBlocks = array_map(fn(PageBlock $b) => [
+            'id' => $b->getId(),
+            'type' => $b->getType(),
+            'position' => $b->getPosition(),
+            'content' => $b->getType() === 'pitch' ? $pitchContent : $b->getContent(),
+        ], $blocks);
+
+        // Backwards compat: if no pitch block exists yet, inject one at position 0
+        $hasPitchBlock = array_filter($blocks, fn(PageBlock $b) => $b->getType() === 'pitch');
+        if (!$hasPitchBlock) {
+            array_unshift($serializedBlocks, [
+                'id' => 0,
+                'type' => 'pitch',
+                'position' => -1,
+                'content' => $pitchContent,
+            ]);
+        }
+
+        return $this->json([
+            'primaryColor' => $primaryColor,
+            'designTemplate' => $designTemplate,
+            'blocks' => $serializedBlocks,
         ]);
     }
 

@@ -8,6 +8,7 @@ import { RegisterPage } from './pages/RegisterPage'
 import { DashboardPage } from './pages/DashboardPage'
 import { LeadDetailPage } from './pages/LeadDetailPage'
 import { TemplatesPage } from './pages/TemplatesPage'
+import { SettingsPage } from './pages/SettingsPage'
 import { PitchPagePublic } from './pages/PitchPagePublic'
 
 const queryClient = new QueryClient({
@@ -37,6 +38,10 @@ export default function App() {
               <Route
                 path="/templates"
                 element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>}
+              />
+              <Route
+                path="/settings"
+                element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}
               />
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
             </Routes>

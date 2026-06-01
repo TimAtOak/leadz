@@ -16,6 +16,10 @@ export default defineConfig({
         target: process.env.BACKEND_URL ?? 'http://localhost:8000',
         changeOrigin: true,
       },
+      '/uploads': {
+        target: process.env.BACKEND_URL ?? 'http://localhost:8000',
+        changeOrigin: true,
+      },
     },
   },
 })

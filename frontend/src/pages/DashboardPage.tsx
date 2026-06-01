@@ -3,24 +3,26 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getLeads } from '../api/leads'
 import { LeadStatusBadge } from '../components/LeadStatusBadge'
+import { AddLeadModal } from '../components/AddLeadModal'
 import { Layout } from '../components/Layout'
 import type { LeadStatus } from '../types'
 
 const STATUS_FILTERS: Array<{ value: string; label: string }> = [
-  { value: '', label: 'All' },
-  { value: 'new', label: 'New' },
-  { value: 'reviewed', label: 'Reviewed' },
-  { value: 'page_created', label: 'Page Created' },
-  { value: 'contacted', label: 'Contacted' },
-  { value: 'opened', label: 'Opened' },
-  { value: 'responded', label: 'Responded' },
-  { value: 'won', label: 'Won' },
-  { value: 'lost', label: 'Lost' },
+  { value: '', label: 'Alle' },
+  { value: 'new', label: 'Neu' },
+  { value: 'reviewed', label: 'Geprüft' },
+  { value: 'page_created', label: 'Seite erstellt' },
+  { value: 'contacted', label: 'Kontaktiert' },
+  { value: 'opened', label: 'Geöffnet' },
+  { value: 'responded', label: 'Geantwortet' },
+  { value: 'won', label: 'Gewonnen' },
+  { value: 'lost', label: 'Verloren' },
 ]
 
 export function DashboardPage() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
+  const [showAddModal, setShowAddModal] = useState(false)
 
   const { data, isLoading } = useQuery({
     queryKey: ['leads', page, statusFilter],
@@ -34,12 +36,15 @@ export function DashboardPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Leads</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              {data ? `${data.meta.total} total` : ''}
+              {data ? `${data.meta.total} gesamt` : ''}
             </p>
           </div>
-          <div className="text-sm bg-blue-50 border border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400 px-3 py-1.5 rounded-lg">
-            Use the Chrome extension to add leads
-          </div>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-4 py-2 text-sm bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors font-medium"
+          >
+            + Lead hinzufügen
+          </button>
         </div>
 
         <div className="flex gap-2 flex-wrap">
@@ -66,8 +71,8 @@ export function DashboardPage() {
 
         {!isLoading && data?.data.length === 0 && (
           <div className="text-center py-16 text-gray-400 dark:text-gray-600">
-            <p className="text-lg">No leads yet</p>
-            <p className="text-sm mt-1">Install the Chrome extension and visit a website to add your first lead.</p>
+            <p className="text-lg">Noch keine Leads</p>
+            <p className="text-sm mt-1">Lead manuell hinzufügen oder Chrome-Erweiterung installieren, um beim Surfen Leads hinzuzufügen.</p>
           </div>
         )}
 
@@ -77,10 +82,10 @@ export function DashboardPage() {
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50">
                   <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Domain</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Title</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Titel</th>
                   <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Views</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Added</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Aufrufe</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Hinzugefügt</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -104,21 +109,14 @@ export function DashboardPage() {
                       <LeadStatusBadge status={lead.status as LeadStatus} />
                     </td>
                     <td className="px-4 py-3 text-gray-500 dark:text-gray-400">
-                      {lead.hasPitchPage ? (
-                        <span className="text-orange-600 dark:text-orange-400 font-medium">
-                          {/* view count shown on detail */}—
-                        </span>
-                      ) : '—'}
+                      {lead.hasPitchPage ? <span className="text-orange-600 dark:text-orange-400 font-medium">—</span> : '—'}
                     </td>
                     <td className="px-4 py-3 text-gray-400 dark:text-gray-500">
-                      {new Date(lead.createdAt).toLocaleDateString()}
+                      {new Date(lead.createdAt).toLocaleDateString('de-DE')}
                     </td>
                     <td className="px-4 py-3">
-                      <Link
-                        to={`/leads/${lead.id}`}
-                        className="text-brand-600 hover:underline font-medium"
-                      >
-                        Open →
+                      <Link to={`/leads/${lead.id}`} className="text-brand-600 hover:underline font-medium">
+                        Öffnen →
                       </Link>
                     </td>
                   </tr>
@@ -135,7 +133,7 @@ export function DashboardPage() {
               disabled={page === 1}
               className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
-              Previous
+              Zurück
             </button>
             <span className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">
               {page} / {data.meta.pages}
@@ -145,11 +143,12 @@ export function DashboardPage() {
               disabled={page === data.meta.pages}
               className="px-4 py-2 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
             >
-              Next
+              Weiter
             </button>
           </div>
         )}
       </div>
+      {showAddModal && <AddLeadModal onClose={() => setShowAddModal(false)} />}
     </Layout>
   )
 }

@@ -21,7 +21,7 @@ export function RegisterPage() {
       authLogin(token, user)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err.response?.data?.error ?? 'Registration failed')
+      setError(err.response?.data?.error ?? 'Registrierung fehlgeschlagen')
     } finally {
       setIsLoading(false)
     }
@@ -32,7 +32,7 @@ export function RegisterPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Leadz</h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Create your account</p>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">Konto erstellen</p>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -49,22 +49,22 @@ export function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
-                placeholder="Your name"
+                placeholder="Ihr Name"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">E-Mail</label>
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
-                placeholder="you@company.com"
+                placeholder="sie@unternehmen.de"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Passwort</label>
               <input
                 type="password"
                 required
@@ -72,7 +72,7 @@ export function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
-                placeholder="Min. 8 characters"
+                placeholder="Mind. 8 Zeichen"
               />
             </div>
             <button
@@ -80,13 +80,13 @@ export function RegisterPage() {
               disabled={isLoading}
               className="w-full py-2.5 px-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-medium rounded-lg transition-colors"
             >
-              {isLoading ? 'Creating account…' : 'Create account'}
+              {isLoading ? 'Konto wird erstellt…' : 'Konto erstellen'}
             </button>
           </form>
           <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            Already have an account?{' '}
+            Bereits ein Konto?{' '}
             <Link to="/login" className="text-brand-600 hover:underline font-medium">
-              Sign in
+              Einloggen
             </Link>
           </p>
         </div>

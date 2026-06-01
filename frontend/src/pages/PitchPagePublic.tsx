@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { getPublicPitchPage, trackPitchPageView } from '../api/pitchPages'
-import { PitchTemplate } from '../components/PitchTemplates'
+import { BlockRenderer } from '../components/BlockRenderer'
 
 export function PitchPagePublic() {
   const { slug } = useParams<{ slug: string }>()
@@ -32,12 +32,12 @@ export function PitchPagePublic() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-700 mb-2">Page not found</h1>
-          <p className="text-gray-400">This pitch page doesn't exist or has been removed.</p>
+          <h1 className="text-2xl font-bold text-gray-700 mb-2">Seite nicht gefunden</h1>
+          <p className="text-gray-400">Diese Pitch-Seite existiert nicht oder wurde entfernt.</p>
         </div>
       </div>
     )
   }
 
-  return <PitchTemplate data={data} />
+  return <BlockRenderer blocks={data.blocks} primaryColor={data.primaryColor} designTemplate={data.designTemplate} />
 }

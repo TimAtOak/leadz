@@ -13,6 +13,11 @@ export async function getLead(id: number): Promise<Lead> {
   return data
 }
 
+export async function createLead(payload: { url: string; domain: string; title?: string; companyName?: string }): Promise<Lead> {
+  const { data } = await apiClient.post('/leads', payload)
+  return data
+}
+
 export async function updateLead(id: number, payload: Partial<Lead>): Promise<Lead> {
   const { data } = await apiClient.patch(`/leads/${id}`, payload)
   return data

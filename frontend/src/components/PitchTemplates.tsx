@@ -1,10 +1,10 @@
-import type { PublicPitchPage, DesignTemplate } from '../types'
+import type { PitchBlockContent, DesignTemplate } from '../types'
 
-type Props = { data: PublicPitchPage }
+type Props = { data: PitchBlockContent }
 
-const company = (d: PublicPitchPage) => d.companyName ?? d.domain
+const company = (d: PitchBlockContent) => d.companyName ?? d.domain
 
-const brandIcon = (d: PublicPitchPage) => d.logoUrl ?? d.faviconUrl
+const brandIcon = (d: PitchBlockContent) => d.logoUrl ?? d.faviconUrl
 
 function BodyText({ body, className, paraClass }: { body: string; className?: string; paraClass?: string }) {
   const paragraphs = body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean)
@@ -222,8 +222,8 @@ export const DESIGN_TEMPLATES: {
   description: string
   accent: string
 }[] = [
-  { id: 'modern',    name: 'Modern',    description: 'Dark & sleek',    accent: 'from-cyan-500 to-violet-500' },
-  { id: 'colorful',  name: 'Cozy',      description: 'Warm & inviting', accent: 'from-amber-300 to-amber-100' },
-  { id: 'corporate', name: 'Corporate', description: 'Professional',    accent: 'from-slate-700 to-slate-900' },
-  { id: 'minimal',   name: 'Minimal',   description: 'Clean & simple',  accent: 'from-gray-100 to-gray-200' },
+  { id: 'modern',    name: 'Modern',      description: 'Dunkel & elegant', accent: 'from-cyan-500 to-violet-500' },
+  { id: 'colorful',  name: 'Gemütlich',  description: 'Warm & einladend', accent: 'from-amber-300 to-amber-100' },
+  { id: 'corporate', name: 'Korporativ', description: 'Professionell',    accent: 'from-slate-700 to-slate-900' },
+  { id: 'minimal',   name: 'Minimal',    description: 'Klar & schlicht',  accent: 'from-gray-100 to-gray-200' },
 ]

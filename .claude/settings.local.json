@@ -30,7 +30,8 @@
       "Bash(pkill -f \"vite\")",
       "Bash(xargs grep *)",
       "Bash(grep -v \"^\\\\s*//\")",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "WebFetch(domain:kontakt.talfrischer.ch)"
     ]
   }
 }

@@ -52,6 +52,7 @@ export interface Lead {
   contactEmail: string | null
   contactPhone: string | null
   status: LeadStatus
+  designTemplate: DesignTemplate
   notes: string | null
   hasPitchPage: boolean
   pitchPageSlug: string | null
@@ -81,7 +82,30 @@ export interface PaginatedResponse<T> {
   }
 }
 
+export interface CompanyInfo {
+  companyName: string | null
+  phone: string | null
+  email: string | null
+  address: string | null
+  primaryColor: string
+}
+
+export type BlockType = 'header' | 'hero' | 'text' | 'split' | 'features' | 'services' | 'team' | 'cta' | 'footer' | 'pitch'
+
+export interface PageBlock {
+  id: number
+  type: BlockType
+  position: number
+  content: Record<string, unknown>
+}
+
 export interface PublicPitchPage {
+  primaryColor: string
+  designTemplate: DesignTemplate
+  blocks: PageBlock[]
+}
+
+export interface PitchBlockContent {
   subject: string
   body: string
   domain: string

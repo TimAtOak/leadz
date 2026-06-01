@@ -15,7 +15,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { to: '/dashboard', label: 'Leads' },
-    { to: '/templates', label: 'Templates' },
+    { to: '/templates', label: 'Vorlagen' },
+    { to: '/settings', label: 'Einstellungen' },
   ]
 
   return (
@@ -64,7 +65,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 onClick={handleLogout}
                 className="text-sm text-gray-500 hover:text-gray-800 dark:text-gray-500 dark:hover:text-gray-200 transition-colors"
               >
-                Sign out
+                Abmelden
               </button>
             </div>
           </div>

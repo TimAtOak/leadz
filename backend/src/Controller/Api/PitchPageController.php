@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\Entity\Lead;
+use App\Entity\PageBlock;
 use App\Entity\PitchPage;
 use App\Entity\User;
 use App\Repository\TemplateRepository;
@@ -83,6 +84,20 @@ class PitchPageController extends AbstractController
         if ($isNew) {
             $em->persist($pitchPage);
             $lead->setStatus(Lead::STATUS_PAGE_CREATED);
+
+            // Create a pitch block so it can be positioned among page blocks
+            $existingPitchBlock = $em->getRepository(PageBlock::class)->findOneBy(['lead' => $lead, 'type' => 'pitch']);
+            if (!$existingPitchBlock) {
+                $maxPosition = 0;
+                foreach ($lead->getPageBlocks() as $b) {
+                    $maxPosition = max($maxPosition, $b->getPosition() + 1);
+                }
+                $pitchBlock = new PageBlock();
+                $pitchBlock->setLead($lead);
+                $pitchBlock->setType('pitch');
+                $pitchBlock->setPosition($maxPosition);
+                $em->persist($pitchBlock);
+            }
         }
 
         $em->flush();
