@@ -5,6 +5,7 @@ import { getLead, updateLead, deleteLead } from '../api/leads'
 import { getTemplates } from '../api/templates'
 import { savePitchPage } from '../api/pitchPages'
 import { getCompanyInfo } from '../api/companyInfo'
+import { publishToWordPress } from '../api/wordpress'
 import { LeadStatusBadge } from '../components/LeadStatusBadge'
 import { BlockBuilder } from '../components/BlockBuilder'
 import { Layout } from '../components/Layout'
@@ -56,6 +57,9 @@ export function LeadDetailPage() {
   const [pitchSubject, setPitchSubject] = useState('')
   const [pitchBody, setPitchBody] = useState('')
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null)
+  const [pitchMode, setPitchMode] = useState<'blocks' | 'wordpress'>('blocks')
+  const [anredeHero, setAnredeHero] = useState('')
+  const [wpResult, setWpResult] = useState<{ wpPostId: number | null; wpPostUrl: string | null } | null>(null)
   const [pitchSaved, setPitchSaved] = useState(false)
   const [copied, setCopied] = useState(false)
 
@@ -71,6 +75,7 @@ export function LeadDetailPage() {
         setPitchBody(lead.pitchPage.body)
         setSelectedTemplateId(lead.pitchPage.templateId)
       }
+      setAnredeHero('Hallo ' + (lead.companyName ?? lead.domain) + ',')
     }
   }, [lead])
 
@@ -93,6 +98,11 @@ export function LeadDetailPage() {
   const deleteMutation = useMutation({
     mutationFn: () => deleteLead(leadId),
     onSuccess: () => navigate('/dashboard'),
+  })
+
+  const wpMutation = useMutation({
+    mutationFn: () => publishToWordPress(leadId, { anredeHero, textHero: pitchBody }),
+    onSuccess: (data) => setWpResult(data),
   })
 
   const applyTemplate = (template: Template) => {
@@ -279,100 +289,192 @@ export function LeadDetailPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-5">
-          <h2 className="font-semibold text-gray-700 dark:text-gray-300 mb-4">Pitch-Seite</h2>
-
-          {shareUrl && (
-            <div className="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 rounded-lg px-4 py-3">
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-0.5">Live-Seite</p>
-                <a
-                  href={shareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-green-800 dark:text-green-300 hover:underline truncate block"
-                >
-                  {shareUrl}
-                </a>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-semibold text-gray-700 dark:text-gray-300">Pitch-Seite</h2>
+            <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs">
               <button
-                onClick={copyShareUrl}
-                className="shrink-0 px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                onClick={() => setPitchMode('blocks')}
+                className={`px-3 py-1.5 font-medium transition-colors ${
+                  pitchMode === 'blocks'
+                    ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
               >
-                {copied ? 'Kopiert!' : 'Link kopieren'}
+                Blocks
               </button>
-              <span className="shrink-0 text-xs text-green-600 dark:text-green-400">
-                {lead.pitchPage?.viewCount ?? 0} Aufrufe
-              </span>
+              <button
+                onClick={() => setPitchMode('wordpress')}
+                className={`px-3 py-1.5 font-medium border-l border-gray-200 dark:border-gray-700 transition-colors ${
+                  pitchMode === 'wordpress'
+                    ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                }`}
+              >
+                WordPress / JetEngine
+              </button>
             </div>
-          )}
+          </div>
 
-          {templates.length > 0 && (
-            <div className="mb-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Vorlage verwenden</p>
-              <div className="flex flex-wrap gap-2">
-                {templates.map((t) => (
+          {pitchMode === 'wordpress' && (
+            <div className="space-y-3">
+              {wpResult?.wpPostUrl && (
+                <div className="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 rounded-lg px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-0.5">WordPress Seite live</p>
+                    <a
+                      href={wpResult.wpPostUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-green-800 dark:text-green-300 hover:underline truncate block"
+                    >
+                      {wpResult.wpPostUrl}
+                    </a>
+                  </div>
+                </div>
+              )}
+              {lead.websiteScan?.logoUrl && (
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <img src={lead.websiteScan.logoUrl} alt="Logo" className="h-6 w-6 object-contain rounded" />
+                  <span className="truncate text-xs">{lead.websiteScan.logoUrl}</span>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Anrede / Überschrift (anrede-hero)</label>
+                <input
+                  type="text"
+                  value={anredeHero}
+                  onChange={(e) => setAnredeHero(e.target.value)}
+                  className={inputClass}
+                  placeholder="Hallo Muster GmbH,"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Pitch-Text (text-hero)</label>
+                <textarea
+                  value={pitchBody}
+                  onChange={(e) => setPitchBody(e.target.value)}
+                  rows={10}
+                  className={`${inputClass} resize-y`}
+                  placeholder="Schreiben Sie Ihre persönliche Pitch-Nachricht…"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                {wpMutation.isError && (
+                  <span className="text-sm text-red-500">
+                    {(wpMutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Fehler beim Pushen'}
+                  </span>
+                )}
+                <div className="ml-auto">
                   <button
-                    key={t.id}
-                    onClick={() => applyTemplate(t)}
-                    className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                      selectedTemplateId === t.id
-                        ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-400'
-                        : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-                    }`}
+                    onClick={() => wpMutation.mutate()}
+                    disabled={wpMutation.isPending || !pitchBody}
+                    className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    {t.name}
+                    {wpMutation.isPending ? 'Wird gepusht…' : 'Zu WordPress pushen'}
                   </button>
-                ))}
+                </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Betreff</label>
-              <input
-                type="text"
-                value={pitchSubject}
-                onChange={(e) => setPitchSubject(e.target.value)}
-                className={inputClass}
-                placeholder="Ihr Pitch-Betreff"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Text</label>
-              <textarea
-                value={pitchBody}
-                onChange={(e) => setPitchBody(e.target.value)}
-                rows={10}
-                className={`${inputClass} resize-y font-mono`}
-                placeholder="Schreiben Sie Ihre persönliche Pitch-Nachricht…"
-              />
-            </div>
-          </div>
+          {pitchMode === 'blocks' && (
+            <>
+              {shareUrl && (
+                <div className="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 rounded-lg px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-0.5">Live-Seite</p>
+                    <a
+                      href={shareUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-green-800 dark:text-green-300 hover:underline truncate block"
+                    >
+                      {shareUrl}
+                    </a>
+                  </div>
+                  <button
+                    onClick={copyShareUrl}
+                    className="shrink-0 px-3 py-1.5 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    {copied ? 'Kopiert!' : 'Link kopieren'}
+                  </button>
+                  <span className="shrink-0 text-xs text-green-600 dark:text-green-400">
+                    {lead.pitchPage?.viewCount ?? 0} Aufrufe
+                  </span>
+                </div>
+              )}
 
-          <div className="mt-4 flex items-center justify-between">
-            {pitchSaved && (
-              <span className="text-sm text-green-600 dark:text-green-400 font-medium">Gespeichert und veröffentlicht!</span>
-            )}
-            <div className="ml-auto">
-              <button
-                onClick={handlePublishPitch}
-                disabled={pitchMutation.isPending || !pitchSubject || !pitchBody}
-                className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-              >
-                {pitchMutation.isPending ? 'Wird veröffentlicht…' : lead.hasPitchPage ? 'Seite aktualisieren' : 'Seite veröffentlichen'}
-              </button>
-            </div>
-          </div>
+              {templates.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Vorlage verwenden</p>
+                  <div className="flex flex-wrap gap-2">
+                    {templates.map((t) => (
+                      <button
+                        key={t.id}
+                        onClick={() => applyTemplate(t)}
+                        className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
+                          selectedTemplateId === t.id
+                            ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-400'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
+                        }`}
+                      >
+                        {t.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Betreff</label>
+                  <input
+                    type="text"
+                    value={pitchSubject}
+                    onChange={(e) => setPitchSubject(e.target.value)}
+                    className={inputClass}
+                    placeholder="Ihr Pitch-Betreff"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Text</label>
+                  <textarea
+                    value={pitchBody}
+                    onChange={(e) => setPitchBody(e.target.value)}
+                    rows={10}
+                    className={`${inputClass} resize-y font-mono`}
+                    placeholder="Schreiben Sie Ihre persönliche Pitch-Nachricht…"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                {pitchSaved && (
+                  <span className="text-sm text-green-600 dark:text-green-400 font-medium">Gespeichert und veröffentlicht!</span>
+                )}
+                <div className="ml-auto">
+                  <button
+                    onClick={handlePublishPitch}
+                    disabled={pitchMutation.isPending || !pitchSubject || !pitchBody}
+                    className="px-5 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    {pitchMutation.isPending ? 'Wird veröffentlicht…' : lead.hasPitchPage ? 'Seite aktualisieren' : 'Seite veröffentlichen'}
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-6">
-          <BlockBuilder
-            leadId={leadId}
-            designTemplate={lead.designTemplate ?? 'modern'}
-            primaryColor={companyInfo?.primaryColor ?? '#6366f1'}
-          />
-        </div>
+        {pitchMode === 'blocks' && (
+          <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-6">
+            <BlockBuilder
+              leadId={leadId}
+              designTemplate={lead.designTemplate ?? 'modern'}
+              primaryColor={companyInfo?.primaryColor ?? '#6366f1'}
+            />
+          </div>
+        )}
       </div>
     </Layout>
   )
