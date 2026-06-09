@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlocks, createBlock, updateBlock, deleteBlock, reorderBlocks } from '../api/pageBlocks'
 import { updateLead } from '../api/leads'
@@ -50,6 +50,31 @@ export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
   const [editingBlock, setEditingBlock] = useState<PageBlock | null>(null)
   const [showTypeMenu, setShowTypeMenu] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [drawerWidth, setDrawerWidth] = useState(520)
+  const isResizing = useRef(false)
+  const resizeStartX = useRef(0)
+  const resizeStartWidth = useRef(0)
+
+  const onResizeStart = useCallback((e: React.MouseEvent) => {
+    isResizing.current = true
+    resizeStartX.current = e.clientX
+    resizeStartWidth.current = drawerWidth
+    e.preventDefault()
+
+    const onMouseMove = (ev: MouseEvent) => {
+      if (!isResizing.current) return
+      const delta = resizeStartX.current - ev.clientX
+      const next = Math.min(Math.max(resizeStartWidth.current + delta, 320), window.innerWidth - 80)
+      setDrawerWidth(next)
+    }
+    const onMouseUp = () => {
+      isResizing.current = false
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('mouseup', onMouseUp)
+    }
+    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('mouseup', onMouseUp)
+  }, [drawerWidth])
 
   const templateMutation = useMutation({
     mutationFn: (t: DesignTemplate) => updateLead(leadId, { designTemplate: t }),
@@ -243,9 +268,14 @@ export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
 
       {showPreview && (
         <div
-          className="fixed top-0 right-0 bottom-0 z-40 w-full sm:w-[520px] flex flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl"
-          style={{ boxShadow: '-8px 0 32px rgba(0,0,0,0.12)' }}
+          className="fixed top-0 right-0 bottom-0 z-40 flex flex-col bg-white dark:bg-gray-950 border-l border-gray-200 dark:border-gray-800 shadow-2xl"
+          style={{ width: drawerWidth, boxShadow: '-8px 0 32px rgba(0,0,0,0.12)' }}
         >
+          {/* Resize handle */}
+          <div
+            onMouseDown={onResizeStart}
+            className="absolute left-0 top-0 bottom-0 w-1.5 cursor-ew-resize hover:bg-brand-400/40 transition-colors z-50"
+          />
           {/* Sidebar header */}
           <div className="flex-none flex items-center gap-3 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
             <button
