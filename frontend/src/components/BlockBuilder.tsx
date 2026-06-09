@@ -1,11 +1,9 @@
 import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getBlocks, createBlock, updateBlock, deleteBlock, reorderBlocks } from '../api/pageBlocks'
-import { updateLead } from '../api/leads'
 import { BlockEditor } from './BlockEditor'
 import { BlockRenderer } from './BlockRenderer'
-import { DESIGN_TEMPLATES } from './PitchTemplates'
-import type { BlockType, DesignTemplate, PageBlock } from '../types'
+import type { BlockType, PageBlock } from '../types'
 
 const BLOCK_TYPES: BlockType[] = ['header', 'hero', 'text', 'split', 'features', 'services', 'team', 'cta', 'footer']
 
@@ -41,11 +39,13 @@ function blockPreview(block: PageBlock): string {
 
 interface Props {
   leadId: number
-  designTemplate: DesignTemplate
   primaryColor: string
+  secondaryColor: string
+  textColor: string
+  headingColor: string
 }
 
-export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
+export function BlockBuilder({ leadId, primaryColor, secondaryColor, textColor, headingColor }: Props) {
   const queryClient = useQueryClient()
   const [editingBlock, setEditingBlock] = useState<PageBlock | null>(null)
   const [showTypeMenu, setShowTypeMenu] = useState(false)
@@ -75,11 +75,6 @@ export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
   }, [drawerWidth])
-
-  const templateMutation = useMutation({
-    mutationFn: (t: DesignTemplate) => updateLead(leadId, { designTemplate: t }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['lead', leadId] }),
-  })
 
   const { data: blocks = [], isLoading } = useQuery({
     queryKey: ['blocks', leadId],
@@ -124,36 +119,6 @@ export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Design-Vorlage</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {DESIGN_TEMPLATES.map(t => (
-            <button
-              key={t.id}
-              onClick={() => templateMutation.mutate(t.id)}
-              className={`relative rounded-xl overflow-hidden border-2 transition-all text-left ${
-                designTemplate === t.id
-                  ? 'border-brand-500 shadow-md'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-              }`}
-            >
-              <div className={`h-10 w-full bg-gradient-to-r ${t.accent}`} />
-              <div className="px-3 py-2 bg-white dark:bg-gray-800">
-                <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">{t.name}</p>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">{t.description}</p>
-              </div>
-              {designTemplate === t.id && (
-                <div className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-brand-500 flex items-center justify-center">
-                  <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
-
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100">Seitenblöcke</h2>
         <div className="flex items-center gap-2">
@@ -308,7 +273,7 @@ export function BlockBuilder({ leadId, designTemplate, primaryColor }: Props) {
                 </div>
               </div>
             ) : (
-              <BlockRenderer blocks={blocks} primaryColor={primaryColor} designTemplate={designTemplate} />
+              <BlockRenderer blocks={blocks} primaryColor={primaryColor} secondaryColor={secondaryColor} textColor={textColor} headingColor={headingColor} />
             )}
           </div>
         </div>

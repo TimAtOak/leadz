@@ -31,8 +31,10 @@ class PublicController extends AbstractController
         $blocks = $em->getRepository(PageBlock::class)->findBy(['lead' => $lead], ['position' => 'ASC']);
 
         $companyInfo = $em->getRepository(CompanyInfo::class)->findOneBy(['user' => $lead->getUser()]);
-        $primaryColor = $companyInfo?->getPrimaryColor() ?? '#3b82f6';
-        $designTemplate = $lead->getDesignTemplate();
+        $primaryColor   = $companyInfo?->getPrimaryColor()   ?? '#3b82f6';
+        $secondaryColor = $companyInfo?->getSecondaryColor() ?? '#6366f1';
+        $textColor      = $companyInfo?->getTextColor()      ?? '#374151';
+        $headingColor   = $companyInfo?->getHeadingColor()   ?? '#111827';
 
         $pitchContent = [
             'subject' => $pitchPage->getSubject(),
@@ -40,7 +42,6 @@ class PublicController extends AbstractController
             'domain' => $lead->getDomain(),
             'companyName' => $lead->getCompanyName(),
             'publishedAt' => $pitchPage->getPublishedAt()?->format('c'),
-            'designTemplate' => $designTemplate,
             'faviconUrl' => $scan?->getFaviconUrl(),
             'ogImageUrl' => $scan?->getOgImageUrl(),
             'logoUrl' => $scan?->getLogoUrl(),
@@ -65,9 +66,11 @@ class PublicController extends AbstractController
         }
 
         return $this->json([
-            'primaryColor' => $primaryColor,
-            'designTemplate' => $designTemplate,
-            'blocks' => $serializedBlocks,
+            'primaryColor'   => $primaryColor,
+            'secondaryColor' => $secondaryColor,
+            'textColor'      => $textColor,
+            'headingColor'   => $headingColor,
+            'blocks'         => $serializedBlocks,
         ]);
     }
 

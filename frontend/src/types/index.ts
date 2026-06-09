@@ -50,9 +50,15 @@ export interface Lead {
   title: string | null
   companyName: string | null
   contactEmail: string | null
+  contactName: string | null
   contactPhone: string | null
   status: LeadStatus
   designTemplate: DesignTemplate
+  pitchMode: 'blocks' | 'wordpress'
+  wpAnredeHero: string | null
+  wpTextHero: string | null
+  wpPostId: number | null
+  wpPostUrl: string | null
   notes: string | null
   hasPitchPage: boolean
   pitchPageSlug: string | null
@@ -88,6 +94,11 @@ export interface CompanyInfo {
   email: string | null
   address: string | null
   primaryColor: string
+  secondaryColor: string
+  textColor: string
+  headingColor: string
+  emailSubject: string | null
+  emailBody: string | null
 }
 
 export type BlockType = 'header' | 'hero' | 'text' | 'split' | 'features' | 'services' | 'team' | 'cta' | 'footer' | 'pitch'
@@ -101,7 +112,9 @@ export interface PageBlock {
 
 export interface PublicPitchPage {
   primaryColor: string
-  designTemplate: DesignTemplate
+  secondaryColor: string
+  textColor: string
+  headingColor: string
   blocks: PageBlock[]
 }
 
@@ -111,7 +124,6 @@ export interface PitchBlockContent {
   domain: string
   companyName: string | null
   publishedAt: string
-  designTemplate: DesignTemplate
   faviconUrl: string | null
   ogImageUrl: string | null
   logoUrl: string | null

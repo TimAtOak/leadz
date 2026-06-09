@@ -40,6 +40,14 @@ composer install
 
 ### Generate JWT keys
 
+**With Docker (recommended):**
+
+```bash
+docker-compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
+```
+
+**Without Docker:**
+
 ```bash
 mkdir -p config/jwt
 openssl genpkey -algorithm RSA -out config/jwt/private.pem -pkeyopt rsa_keygen_bits:4096

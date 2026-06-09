@@ -1,15 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getLead, updateLead, deleteLead } from '../api/leads'
-import { getTemplates } from '../api/templates'
 import { savePitchPage } from '../api/pitchPages'
 import { getCompanyInfo } from '../api/companyInfo'
 import { publishToWordPress } from '../api/wordpress'
 import { LeadStatusBadge } from '../components/LeadStatusBadge'
 import { BlockBuilder } from '../components/BlockBuilder'
 import { Layout } from '../components/Layout'
-import type { LeadStatus, Template } from '../types'
+import type { LeadStatus } from '../types'
 
 const LEAD_STATUSES: LeadStatus[] = [
   'new', 'reviewed', 'page_created', 'contacted', 'opened', 'responded', 'won', 'lost',
@@ -34,17 +33,12 @@ export function LeadDetailPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
 
-  const { data: lead, isLoading } = useQuery({
+  const { data: lead, isLoading, isFetching } = useQuery({
     queryKey: ['lead', leadId],
     queryFn: () => getLead(leadId),
   })
 
-  const { data: templates = [] } = useQuery({
-    queryKey: ['templates'],
-    queryFn: getTemplates,
-  })
-
-  const { data: companyInfo } = useQuery({
+const { data: companyInfo } = useQuery({
     queryKey: ['company-info'],
     queryFn: getCompanyInfo,
   })
@@ -52,32 +46,40 @@ export function LeadDetailPage() {
   const [status, setStatus] = useState<LeadStatus>('new')
   const [companyName, setCompanyName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
+  const [contactName, setContactName] = useState('')
   const [contactPhone, setContactPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [pitchSubject, setPitchSubject] = useState('')
   const [pitchBody, setPitchBody] = useState('')
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null)
-  const [pitchMode, setPitchMode] = useState<'blocks' | 'wordpress'>('blocks')
+const [pitchMode, setPitchMode] = useState<'blocks' | 'wordpress'>('blocks')
   const [anredeHero, setAnredeHero] = useState('')
+  const [wpTextHero, setWpTextHero] = useState('')
   const [wpResult, setWpResult] = useState<{ wpPostId: number | null; wpPostUrl: string | null } | null>(null)
+  const formInitialized = useRef(false)
   const [pitchSaved, setPitchSaved] = useState(false)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    if (lead) {
-      setStatus(lead.status)
-      setCompanyName(lead.companyName ?? '')
-      setContactEmail(lead.contactEmail ?? '')
-      setContactPhone(lead.contactPhone ?? '')
-      setNotes(lead.notes ?? '')
-      if (lead.pitchPage) {
-        setPitchSubject(lead.pitchPage.subject)
-        setPitchBody(lead.pitchPage.body)
-        setSelectedTemplateId(lead.pitchPage.templateId)
-      }
-      setAnredeHero('Hallo ' + (lead.companyName ?? lead.domain) + ',')
+    formInitialized.current = false
+  }, [leadId])
+
+  useEffect(() => {
+    if (!lead || isFetching || formInitialized.current) return
+    formInitialized.current = true
+    setStatus(lead.status)
+    setCompanyName(lead.companyName ?? '')
+    setContactEmail(lead.contactEmail ?? '')
+    setContactName(lead.contactName ?? '')
+    setContactPhone(lead.contactPhone ?? '')
+    setNotes(lead.notes ?? '')
+    if (lead.pitchPage) {
+      setPitchSubject(lead.pitchPage.subject)
+      setPitchBody(lead.pitchPage.body)
     }
-  }, [lead])
+    setPitchMode(lead.pitchMode ?? 'blocks')
+    setAnredeHero(lead.wpAnredeHero ?? ('Hallo ' + (lead.companyName ?? lead.domain) + ','))
+    setWpTextHero(lead.wpTextHero ?? '')
+  }, [lead, isFetching])
 
   const updateMutation = useMutation({
     mutationFn: (payload: Parameters<typeof updateLead>[1]) => updateLead(leadId, payload),
@@ -85,7 +87,7 @@ export function LeadDetailPage() {
   })
 
   const pitchMutation = useMutation({
-    mutationFn: (payload: { subject: string; body: string; templateId?: number }) =>
+    mutationFn: (payload: { subject: string; body: string }) =>
       savePitchPage(leadId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lead', leadId] })
@@ -101,39 +103,50 @@ export function LeadDetailPage() {
   })
 
   const wpMutation = useMutation({
-    mutationFn: () => publishToWordPress(leadId, { anredeHero, textHero: pitchBody }),
-    onSuccess: (data) => setWpResult(data),
+    mutationFn: async () => {
+      await updateLead(leadId, { pitchMode: 'wordpress', wpAnredeHero: anredeHero, wpTextHero })
+      return publishToWordPress(leadId, { anredeHero, textHero: wpTextHero })
+    },
+    onSuccess: (data) => {
+      setWpResult(data)
+      queryClient.invalidateQueries({ queryKey: ['lead', leadId] })
+      queryClient.invalidateQueries({ queryKey: ['leads'] })
+    },
   })
 
-  const applyTemplate = (template: Template) => {
-    setSelectedTemplateId(template.id)
-    setPitchSubject(template.subject)
-    const domain = lead?.domain ?? ''
-    const company = lead?.companyName ?? domain
-    const url = lead?.url ?? ''
-    setPitchBody(
-      template.body
-        .replace(/\{\{company_name\}\}/g, company)
-        .replace(/\{\{domain\}\}/g, domain)
-        .replace(/\{\{url\}\}/g, url)
-    )
+  const switchMode = (mode: 'blocks' | 'wordpress') => {
+    setPitchMode(mode)
+    updateLead(leadId, { pitchMode: mode }) // fire-and-forget; no refetch to avoid resetting WP fields
   }
 
-  const handleSaveLead = () => {
-    updateMutation.mutate({ status, companyName, contactEmail, contactPhone, notes })
+const handleSaveLead = () => {
+    updateMutation.mutate({ status, companyName, contactEmail, contactName, contactPhone, notes })
   }
 
   const handlePublishPitch = () => {
-    pitchMutation.mutate({
-      subject: pitchSubject,
-      body: pitchBody,
-      ...(selectedTemplateId ? { templateId: selectedTemplateId } : {}),
-    })
+    pitchMutation.mutate({ subject: pitchSubject, body: pitchBody })
   }
 
   const shareUrl = lead?.pitchPage
     ? `${window.location.origin}/p/${lead.pitchPage.publicSlug}`
     : null
+
+  const pitchUrl = pitchMode === 'wordpress'
+    ? (lead?.wpPostUrl ?? wpResult?.wpPostUrl ?? '')
+    : (shareUrl ?? '')
+
+  const handleSendEmail = () => {
+    if (!lead || !companyInfo?.emailBody) return
+    const replace = (s: string) => s
+      .replace(/\{\{company_name\}\}/g, lead.companyName ?? lead.domain)
+      .replace(/\{\{domain\}\}/g, lead.domain)
+      .replace(/\{\{pitch_url\}\}/g, pitchUrl)
+      .replace(/\{\{contact_name\}\}/g, contactName || (lead.contactName ?? ''))
+    const subject = encodeURIComponent(replace(companyInfo.emailSubject ?? ''))
+    const body = encodeURIComponent(replace(companyInfo.emailBody))
+    const to = contactEmail || lead.contactEmail || ''
+    window.open(`mailto:${to}?subject=${subject}&body=${body}`)
+  }
 
   const copyShareUrl = async () => {
     if (shareUrl) {
@@ -248,6 +261,16 @@ export function LeadDetailPage() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Ansprechpartner</label>
+              <input
+                type="text"
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                className={inputClass}
+                placeholder="Vor- und Nachname"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Kontakt-E-Mail</label>
               <input
                 type="email"
@@ -293,7 +316,7 @@ export function LeadDetailPage() {
             <h2 className="font-semibold text-gray-700 dark:text-gray-300">Pitch-Seite</h2>
             <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs">
               <button
-                onClick={() => setPitchMode('blocks')}
+                onClick={() => switchMode('blocks')}
                 className={`px-3 py-1.5 font-medium transition-colors ${
                   pitchMode === 'blocks'
                     ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
@@ -303,7 +326,7 @@ export function LeadDetailPage() {
                 Blocks
               </button>
               <button
-                onClick={() => setPitchMode('wordpress')}
+                onClick={() => switchMode('wordpress')}
                 className={`px-3 py-1.5 font-medium border-l border-gray-200 dark:border-gray-700 transition-colors ${
                   pitchMode === 'wordpress'
                     ? 'bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900'
@@ -317,17 +340,17 @@ export function LeadDetailPage() {
 
           {pitchMode === 'wordpress' && (
             <div className="space-y-3">
-              {wpResult?.wpPostUrl && (
+              {(lead.wpPostUrl || wpResult?.wpPostUrl) && (
                 <div className="mb-4 flex items-center gap-3 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800 rounded-lg px-4 py-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-green-600 dark:text-green-400 font-medium mb-0.5">WordPress Seite live</p>
                     <a
-                      href={wpResult.wpPostUrl}
+                      href={(lead.wpPostUrl ?? wpResult?.wpPostUrl)!}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-green-800 dark:text-green-300 hover:underline truncate block"
                     >
-                      {wpResult.wpPostUrl}
+                      {lead.wpPostUrl ?? wpResult?.wpPostUrl}
                     </a>
                   </div>
                 </div>
@@ -351,26 +374,35 @@ export function LeadDetailPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Pitch-Text (text-hero)</label>
                 <textarea
-                  value={pitchBody}
-                  onChange={(e) => setPitchBody(e.target.value)}
+                  value={wpTextHero}
+                  onChange={(e) => setWpTextHero(e.target.value)}
                   rows={10}
                   className={`${inputClass} resize-y`}
                   placeholder="Schreiben Sie Ihre persönliche Pitch-Nachricht…"
                 />
               </div>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 {wpMutation.isError && (
                   <span className="text-sm text-red-500">
                     {(wpMutation.error as { response?: { data?: { error?: string } } })?.response?.data?.error ?? 'Fehler beim Pushen'}
                   </span>
                 )}
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
+                  {(lead.wpPostUrl || wpResult?.wpPostUrl) && companyInfo?.emailBody && (
+                    <button
+                      onClick={handleSendEmail}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      E-Mail senden
+                    </button>
+                  )}
                   <button
                     onClick={() => wpMutation.mutate()}
-                    disabled={wpMutation.isPending || !pitchBody}
+                    disabled={wpMutation.isPending || !wpTextHero}
                     className="px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
                   >
-                    {wpMutation.isPending ? 'Wird gepusht…' : 'Zu WordPress pushen'}
+                    {wpMutation.isPending ? 'Wird gespeichert & gepusht…' : 'Speichern & zu WordPress pushen'}
                   </button>
                 </div>
               </div>
@@ -404,26 +436,6 @@ export function LeadDetailPage() {
                 </div>
               )}
 
-              {templates.length > 0 && (
-                <div className="mb-4">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">Vorlage verwenden</p>
-                  <div className="flex flex-wrap gap-2">
-                    {templates.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => applyTemplate(t)}
-                        className={`px-3 py-1.5 text-xs rounded-full border transition-colors ${
-                          selectedTemplateId === t.id
-                            ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-400 dark:bg-brand-900/20 dark:text-brand-400'
-                            : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600'
-                        }`}
-                      >
-                        {t.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
 
               <div className="space-y-3">
                 <div>
@@ -448,11 +460,20 @@ export function LeadDetailPage() {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
+              <div className="mt-4 flex items-center justify-between gap-3">
                 {pitchSaved && (
                   <span className="text-sm text-green-600 dark:text-green-400 font-medium">Gespeichert und veröffentlicht!</span>
                 )}
-                <div className="ml-auto">
+                <div className="ml-auto flex items-center gap-2">
+                  {shareUrl && companyInfo?.emailBody && (
+                    <button
+                      onClick={handleSendEmail}
+                      className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      E-Mail senden
+                    </button>
+                  )}
                   <button
                     onClick={handlePublishPitch}
                     disabled={pitchMutation.isPending || !pitchSubject || !pitchBody}
@@ -470,8 +491,10 @@ export function LeadDetailPage() {
           <div className="bg-white rounded-xl border border-gray-200 dark:bg-gray-900 dark:border-gray-800 p-6">
             <BlockBuilder
               leadId={leadId}
-              designTemplate={lead.designTemplate ?? 'modern'}
-              primaryColor={companyInfo?.primaryColor ?? '#6366f1'}
+              primaryColor={companyInfo?.primaryColor ?? '#3b82f6'}
+              secondaryColor={companyInfo?.secondaryColor ?? '#6366f1'}
+              textColor={companyInfo?.textColor ?? '#374151'}
+              headingColor={companyInfo?.headingColor ?? '#111827'}
             />
           </div>
         )}

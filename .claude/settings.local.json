@@ -31,7 +31,8 @@
       "Bash(xargs grep *)",
       "Bash(grep -v \"^\\\\s*//\")",
       "Bash(npx vite *)",
-      "WebFetch(domain:kontakt.talfrischer.ch)"
+      "WebFetch(domain:kontakt.talfrischer.ch)",
+      "Bash(docker run *)"
     ]
   }
 }

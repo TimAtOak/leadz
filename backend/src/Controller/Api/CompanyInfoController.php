@@ -50,6 +50,11 @@ class CompanyInfoController extends AbstractController
         if (array_key_exists('email', $data)) $info->setEmail($data['email'] ?: null);
         if (array_key_exists('address', $data)) $info->setAddress($data['address'] ?: null);
         if (array_key_exists('primaryColor', $data)) $info->setPrimaryColor($data['primaryColor'] ?: null);
+        if (array_key_exists('secondaryColor', $data)) $info->setSecondaryColor($data['secondaryColor'] ?: null);
+        if (array_key_exists('textColor', $data)) $info->setTextColor($data['textColor'] ?: null);
+        if (array_key_exists('headingColor', $data)) $info->setHeadingColor($data['headingColor'] ?: null);
+        if (array_key_exists('emailSubject', $data)) $info->setEmailSubject($data['emailSubject'] ?: null);
+        if (array_key_exists('emailBody', $data)) $info->setEmailBody($data['emailBody'] ?: null);
 
         $em->flush();
 
@@ -64,6 +69,11 @@ class CompanyInfoController extends AbstractController
             'email' => $info->getEmail(),
             'address' => $info->getAddress(),
             'primaryColor' => $info->getPrimaryColor() ?? '#3b82f6',
+            'secondaryColor' => $info->getSecondaryColor() ?? '#6366f1',
+            'textColor' => $info->getTextColor() ?? '#374151',
+            'headingColor' => $info->getHeadingColor() ?? '#111827',
+            'emailSubject' => $info->getEmailSubject(),
+            'emailBody' => $info->getEmailBody(),
         ];
     }
 }

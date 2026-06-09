@@ -15,7 +15,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navLinks = [
     { to: '/dashboard', label: 'Leads' },
-    { to: '/templates', label: 'Vorlagen' },
     { to: '/settings', label: 'Einstellungen' },
   ]
 

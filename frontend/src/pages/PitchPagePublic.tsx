@@ -39,5 +39,5 @@ export function PitchPagePublic() {
     )
   }
 
-  return <BlockRenderer blocks={data.blocks} primaryColor={data.primaryColor} designTemplate={data.designTemplate} />
+  return <BlockRenderer blocks={data.blocks} primaryColor={data.primaryColor} secondaryColor={data.secondaryColor} textColor={data.textColor} headingColor={data.headingColor} />
 }

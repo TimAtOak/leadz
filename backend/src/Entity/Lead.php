@@ -55,6 +55,9 @@ class Lead
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $contactEmail = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $contactName = null;
+
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $contactPhone = null;
 
@@ -63,6 +66,21 @@ class Lead
 
     #[ORM\Column(length: 50)]
     private string $designTemplate = 'modern';
+
+    #[ORM\Column(length: 50)]
+    private string $pitchMode = 'blocks';
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $wpAnredeHero = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $wpTextHero = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $wpPostId = null;
+
+    #[ORM\Column(length: 2048, nullable: true)]
+    private ?string $wpPostUrl = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $notes = null;
@@ -116,6 +134,9 @@ class Lead
     public function getContactEmail(): ?string { return $this->contactEmail; }
     public function setContactEmail(?string $contactEmail): static { $this->contactEmail = $contactEmail; return $this; }
 
+    public function getContactName(): ?string { return $this->contactName; }
+    public function setContactName(?string $contactName): static { $this->contactName = $contactName; return $this; }
+
     public function getContactPhone(): ?string { return $this->contactPhone; }
     public function setContactPhone(?string $contactPhone): static { $this->contactPhone = $contactPhone; return $this; }
 
@@ -124,6 +145,21 @@ class Lead
 
     public function getDesignTemplate(): string { return $this->designTemplate; }
     public function setDesignTemplate(string $t): static { $this->designTemplate = $t; return $this; }
+
+    public function getPitchMode(): string { return $this->pitchMode; }
+    public function setPitchMode(string $v): static { $this->pitchMode = $v; return $this; }
+
+    public function getWpAnredeHero(): ?string { return $this->wpAnredeHero; }
+    public function setWpAnredeHero(?string $v): static { $this->wpAnredeHero = $v; return $this; }
+
+    public function getWpTextHero(): ?string { return $this->wpTextHero; }
+    public function setWpTextHero(?string $v): static { $this->wpTextHero = $v; return $this; }
+
+    public function getWpPostId(): ?int { return $this->wpPostId; }
+    public function setWpPostId(?int $v): static { $this->wpPostId = $v; return $this; }
+
+    public function getWpPostUrl(): ?string { return $this->wpPostUrl; }
+    public function setWpPostUrl(?string $v): static { $this->wpPostUrl = $v; return $this; }
 
     public function getNotes(): ?string { return $this->notes; }
     public function setNotes(?string $notes): static { $this->notes = $notes; return $this; }

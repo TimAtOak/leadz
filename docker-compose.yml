@@ -19,6 +19,8 @@ services:
     build:
       context: ./backend
     volumes:
+      - ./backend/src:/app/src
+      - ./backend/migrations:/app/migrations
       - uploads:/app/public/uploads
     environment:
       APP_ENV: dev
@@ -28,6 +30,9 @@ services:
       JWT_PUBLIC_KEY: /app/config/jwt/public.pem
       JWT_PASSPHRASE: leadz_jwt_passphrase
       CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+      WP_URL: https://kontakt.talfrischer.ch
+      WP_USERNAME: Tim
+      WP_APP_PASSWORD: "OKOb 4NUi Swog wypL xYdn iKBh"
     ports:
       - "8000:8000"
     depends_on:

@@ -116,11 +116,23 @@ class LeadController extends AbstractController
         if (array_key_exists('contactEmail', $data)) {
             $lead->setContactEmail($data['contactEmail']);
         }
+        if (array_key_exists('contactName', $data)) {
+            $lead->setContactName($data['contactName'] ?: null);
+        }
         if (array_key_exists('contactPhone', $data)) {
             $lead->setContactPhone($data['contactPhone']);
         }
         if (array_key_exists('notes', $data)) {
             $lead->setNotes($data['notes']);
+        }
+        if (array_key_exists('pitchMode', $data) && in_array($data['pitchMode'], ['blocks', 'wordpress'], true)) {
+            $lead->setPitchMode($data['pitchMode']);
+        }
+        if (array_key_exists('wpAnredeHero', $data)) {
+            $lead->setWpAnredeHero($data['wpAnredeHero'] ?: null);
+        }
+        if (array_key_exists('wpTextHero', $data)) {
+            $lead->setWpTextHero($data['wpTextHero'] ?: null);
         }
 
         $em->flush();
@@ -138,6 +150,26 @@ class LeadController extends AbstractController
             return $this->json(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
         }
 
+        if ($lead->getWpPostId()) {
+            $wpUrl = $_ENV['WP_URL'] ?? '';
+            $wpUsername = $_ENV['WP_USERNAME'] ?? '';
+            $wpAppPassword = $_ENV['WP_APP_PASSWORD'] ?? '';
+
+            if ($wpUrl && $wpUsername && $wpAppPassword) {
+                $ch = curl_init(rtrim($wpUrl, '/') . '/wp-json/wp/v2/lead/' . $lead->getWpPostId() . '?force=true');
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_CUSTOMREQUEST => 'DELETE',
+                    CURLOPT_HTTPHEADER => [
+                        'Authorization: Basic ' . base64_encode($wpUsername . ':' . $wpAppPassword),
+                    ],
+                    CURLOPT_TIMEOUT => 10,
+                ]);
+                curl_exec($ch);
+                curl_close($ch);
+            }
+        }
+
         $em->remove($lead);
         $em->flush();
 
@@ -153,6 +185,7 @@ class LeadController extends AbstractController
             'title' => $lead->getTitle(),
             'companyName' => $lead->getCompanyName(),
             'contactEmail' => $lead->getContactEmail(),
+            'contactName' => $lead->getContactName(),
             'contactPhone' => $lead->getContactPhone(),
             'status' => $lead->getStatus(),
             'designTemplate' => $lead->getDesignTemplate(),
@@ -167,6 +200,11 @@ class LeadController extends AbstractController
     {
         $data = $this->serializeLead($lead);
         $data['notes'] = $lead->getNotes();
+        $data['pitchMode']    = $lead->getPitchMode();
+        $data['wpAnredeHero'] = $lead->getWpAnredeHero();
+        $data['wpTextHero']   = $lead->getWpTextHero();
+        $data['wpPostId']     = $lead->getWpPostId();
+        $data['wpPostUrl']    = $lead->getWpPostUrl();
 
         $scan = $lead->getWebsiteScan();
         if ($scan) {

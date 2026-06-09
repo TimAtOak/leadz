@@ -59,7 +59,12 @@ class WordPressController extends AbstractController
             ],
         ]);
 
-        $ch = curl_init(rtrim($wpUrl, '/') . '/wp-json/wp/v2/lead/');
+        $existingPostId = $lead->getWpPostId();
+        $wpEndpoint = $existingPostId
+            ? rtrim($wpUrl, '/') . '/wp-json/wp/v2/lead/' . $existingPostId
+            : rtrim($wpUrl, '/') . '/wp-json/wp/v2/lead/';
+
+        $ch = curl_init($wpEndpoint);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
@@ -89,9 +94,16 @@ class WordPressController extends AbstractController
             ], Response::HTTP_BAD_GATEWAY);
         }
 
+        $wpPostId  = $wpData['id'] ?? null;
+        $wpPostUrl = $wpData['link'] ?? null;
+
+        $lead->setWpPostId($wpPostId);
+        $lead->setWpPostUrl($wpPostUrl);
+        $em->flush();
+
         return $this->json([
-            'wpPostId' => $wpData['id'] ?? null,
-            'wpPostUrl' => $wpData['link'] ?? null,
+            'wpPostId'  => $wpPostId,
+            'wpPostUrl' => $wpPostUrl,
         ]);
     }
 }
